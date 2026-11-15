@@ -40,8 +40,6 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a construção direta da AST no parser (`_ast_*`) em paralelo a `parse_cst()`, evitando duplicação de código e mantendo compatibilidade com os testes de CST da Fase 3. Confirmamos que cada nó da AST armazena `line` e `column` para suportar mensagens de erro semântico na Fase 5. A justificativa da Seção 8.3 foi redigida pelo trio[cite: 1, 5].
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro encontrado; validamos com `pytest` a igualdade estrutural das ASTs de `1 + 2 * 3`, `(1 + 2) * 3` e `ForNode`.
 
-- **Fase 4 (Árvore Sintática Abstrata):** apoio na modelagem das classes de nós em `src/ast_nodes.py`, implementação de `parse_ast()` em `src/parser.py` e criação dos testes da AST; justificativa formal de preservação semântica redigida pelo grupo[cite: 5, 7].
-
 ---
 
 ### Template para as Próximas Fases
