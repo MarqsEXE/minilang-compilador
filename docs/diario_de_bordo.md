@@ -27,6 +27,13 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a arquitetura de estados explícitos (`q0`..`q10`) pela correspondência direta 1-para-1 com a tabela de transições do relatório. Incluímos suporte a comentários de bloco `/* ... */` (além de `//`) para viabilizar o diagnóstico formal de comentário não fechado no AFD (`q9`/`q10`). A justificativa formal da Seção 6.3 foi redigida pelo trio.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro lógico encontrado; validamos manualmente o comportamento de lookahead em `/` seguido de número (`x / 2`) e em `1x` (rejeitado em `q2` antes de avançar para o parser).
 
+### Fase 3 — Análise Sintática / Parser Descendente Recursivo (15/11/2026)
+
+- **O que foi pedido à IA:** Implementação manual do parser descendente recursivo preditivo LL(1) em `src/parser.py`, construção das árvores sintáticas concretas (`1 + 2 * 3`, `(1 + 2) * 3`, `while` e `for`), roteiro para justificativas formais e comparação com análise LR, além de testes unitários válidos e inválidos[cite: 4, 5].
+- **O que a IA gerou:** Classe `Parser` com métodos correspondentes a cada produção EBNF, estrutura `ParseNode` com método `pretty_print()`, exceção `MiniLangSyntaxError` com linha/coluna, árvores concretas na Seção 7 de `docs/gramatica.md` e 12 novos testes unitários[cite: 4, 5].
+- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a correspondência direta 1-para-1 entre as produções da EBNF e os métodos `_parse_*`, bem como a separação explícita de `parse_cst()` para preservar a Árvore Sintática Concreta antes da abstração para AST na Fase 4. As justificativas da Seção 7.3 e a comparação entre LL(1) e LR/Shift-Reduce foram redigidas pelo trio[cite: 1, 4].
+- **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro lógico encontrado; validamos que comparações encadeadas (`1 < 2 < 3`) são rejeitadas sintaticamente conforme projetado na regra `expr_relacional`.
+
 ---
 
 ### Template para as Próximas Fases

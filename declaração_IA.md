@@ -9,6 +9,8 @@ Em conformidade com a **Portaria CNPq nº 2.664/2026** e com as normas da discip
 
   - **Fase 2 (Análise Léxica):** apoio na codificação do autômato finito determinístico em `src/lexer.py`, estruturação da tabela de transições em `docs/gramatica.md` e criação dos testes unitários de tokens válidos e inválidos; justificativa formal redigida pelo grupo.
 
+  - **Fase 3 (Análise Sintática):** apoio na implementação do parser descendente recursivo LL(1) e da estrutura `ParseNode` em `src/parser.py`, além dos testes sintáticos; justificativas formais e comparação com análise LR redigidas pelo grupo.
+
 - _(Atualizar progressivamente ao final de cada fase: Análise Léxica, Análise Sintática, AST, Interpretador, Catálogo de Erros, Testes e Revisão do Relatório)._
 
 - **Finalidade específica de uso em cada etapa:**

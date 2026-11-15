@@ -281,9 +281,146 @@ Legenda de classes de caracteres:
 ### 6.3. Justificativa Formal: Expressões Regulares $\leftrightarrow$ AFD $\leftrightarrow$ Lexer (Construção do Grupo)
 
 - **Conceito:** Pelo Teorema de Kleene, toda linguagem regular descrita por uma Expressão Regular pode ser reconhecida por um Autômato Finito Determinístico (AFD). Na implementação prática de um lexer, a união das ERs de todos os tokens forma um único AFD com dois mecanismos adicionais: (1) **regra do casamento mais longo (_maximal munch_)**, que continua consumindo caracteres enquanto houver transição válida (evitando que `==` vire dois `=` ou `while` vire `ID`), e (2) **prioridade de palavras reservadas**, que consulta a tabela `KEYWORDS` ao final do estado `q1` em vez de criar dezenas de estados exclusivos no autômato.
-- **Redação do Grupo (base também para a seção "Análise Léxica" de `docs/relatorio.pdf`)[cite: 4]:**
+- **Redação do Grupo (base também para a seção "Análise Léxica" de `docs/relatorio.pdf`):**
   > [PREENCHER PELO GRUPO: Explique com suas palavras:
   >
   > 1. Como o AFD resolve o conflito de prefixo entre operadores simples (`=`, `<`, `>`, `/`) e compostos (`==`, `<=`, `>=`, `//`, `/*`) usando estados intermediários (`q3` a `q6`) e lookahead (`_peek()`).
   > 2. Por que tratar palavras reservadas (`while`, `for`, `if`) via dicionário `KEYWORDS` após o estado `q1` reduz o número de estados do AFD sem alterar a linguagem regular reconhecida.
   > 3. Como os estados de erro no AFD (como `q2` ao ler letra após dígito em `1x`, ou `q9`/`q10` ao atingir `EOF`) garantem que o lexer reconheça **exatamente** os tokens válidos da MiniLang e rejeite cadeias fora da linguagem.]
+
+---
+
+## 7. Análise Sintática (Parser Descendente Recursivo LL(1))
+
+### 7.1. Árvores Sintáticas Concretas de Precedência: `1 + 2 * 3` vs. `(1 + 2) * 3`
+
+#### Árvore 1: `1 + 2 * 3`
+
+```text
+expressao
+  expr_igualdade
+    expr_relacional
+      expr_aritmetica
+        termo
+          fator
+            INT_LITERAL ('1')
+        PLUS ('+')
+        termo
+          fator
+            INT_LITERAL ('2')
+          STAR ('*')
+          fator
+            INT_LITERAL ('3')
+```
+
+#### Árvore 2: `1 + 2 * 3`
+
+```text
+expressao
+  expr_igualdade
+    expr_relacional
+      expr_aritmetica
+        termo
+          fator
+            LPAREN ('(')
+            expressao
+              expr_igualdade
+                expr_relacional
+                  expr_aritmetica
+                    termo
+                      fator
+                        INT_LITERAL ('1')
+                    PLUS ('+')
+                    termo
+                      fator
+                        INT_LITERAL ('2')
+            RPAREN (')')
+          STAR ('*')
+          fator
+            INT_LITERAL ('3')
+```
+
+### 7.2 Árvores Sintáticas Concretas de Laços (while e for)
+
+#### Árvore do Laço while (x < 10) { x = x + 1; }
+
+```text
+laco_while
+  WHILE ('while')
+  LPAREN ('(')
+  expressao
+    expr_igualdade
+      expr_relacional
+        expr_aritmetica -> termo -> fator -> ID ('x')
+        LT ('<')
+        expr_aritmetica -> termo -> fator -> INT_LITERAL ('10')
+  RPAREN (')')
+  bloco
+    LBRACE ('{')
+    comando
+      atribuicao
+        ID ('x')
+        ASSIGN ('=')
+        expressao -> ... -> expr_aritmetica (x + 1)
+      SEMICOLON (';')
+    RBRACE ('}')
+```
+
+#### Árvore do Laço for (i = 0; i < 10; i = i + 1) { print(i); }
+
+```text
+laco_for
+  FOR ('for')
+  LPAREN ('(')
+  atribuicao                          <-- [1ª Cláusula: Inicialização obrigatório]
+    ID ('i')
+    ASSIGN ('=')
+    expressao -> ... -> INT_LITERAL ('0')
+  SEMICOLON (';')
+  expressao                           <-- [2ª Cláusula: Condição booleana obrigatória]
+    expr_igualdade
+      expr_relacional
+        expr_aritmetica -> ... -> ID ('i')
+        LT ('<')
+        expr_aritmetica -> ... -> INT_LITERAL ('10')
+  SEMICOLON (';')
+  atribuicao                          <-- [3ª Cláusula: Atualização obrigatória]
+    ID ('i')
+    ASSIGN ('=')
+    expressao -> ... -> expr_aritmetica (i + 1)
+  RPAREN (')')
+  bloco                               <-- [Corpo do laço]
+    LBRACE ('{')
+    comando
+      impressao
+        PRINT ('print')
+        LPAREN ('(')
+        expressao -> ... -> ID ('i')
+        RPAREN (')')
+      SEMICOLON (';')
+    RBRACE ('}')
+```
+
+## 7.3. Justificativas Formais da Análise Sintática (Construção do Grupo)
+
+### A) Diferença entre as Árvores de `1 + 2 * 3` e `(1 + 2) * 3` (Precedência e Associatividade)
+
+- **Conceito:** Em `1 + 2 * 3`, a multiplicação `2 * 3` fica aninhada mais profundamente sob `termo`, sendo reduzida antes da soma em `expr_aritmetica`. Em `(1 + 2) * 3`, os parênteses na produção `fator = "(" expressao ")"` reiniciam a derivação do topo da hierarquia, forçando `1 + 2` a ser agrupado dentro de `fator` antes da multiplicação externa.
+- **Redação do Grupo (para `docs/relatorio.pdf`):**
+  > [PREENCHER PELO GRUPO: Explique com suas palavras por que as duas árvores acima têm alturas e agrupamentos diferentes, e como os laços `while` dentro de `_parse_expr_aritmetica` e `_parse_termo` garantem associatividade à esquerda em expressões como `10 - 3 - 2`.]
+
+---
+
+### B) Tratamento de `while` e `for` e Rejeição de Entradas Inválidas
+
+- **Conceito:** Como `while` e `for` começam por palavras reservadas exclusivas (`WHILE` e `FOR`), `_parse_comando` despacha imediatamente para `_parse_laco_while` e `_parse_laco_for` com 1 token de _lookahead_. No `for`, as chamadas sequenciais `_parse_atribuicao()` $\to$ `_expect(SEMICOLON)` $\to$ `_parse_expressao()` $\to$ `_expect(SEMICOLON)` $\to$ `_parse_atribuicao()` impõem estruturalmente as três cláusulas obrigatórias.
+- **Redação do Grupo (para `docs/relatorio.pdf`):**
+  > [PREENCHER PELO GRUPO: Explique passo a passo o que ocorre no parser ao processar `x = (1 + ;` e `for (i = 0; i < 10) { ... }`, indicando exatamente qual método falha e qual token era esperado vs. encontrado.]
+
+---
+
+### C) Comparação: Descendente Recursivo LL(1) vs. Análise Ascendente LR (Shift-Reduce)
+
+- **Conceito:** Enquanto o parser descendente recursivo (_top-down_ LL(1)) parte do símbolo inicial `programa` tentando derivar a entrada usando a pilha de chamadas da linguagem hospedeira, um parser ascendente LR (_bottom-up_ _shift-reduce_, como SLR/LALR) empilha tokens (_shift_) e os reduz (_reduce_) ao lado esquerdo das produções usando autômatos de itens LR e tabelas `ACTION`/`GOTO`.
+- **Redação do Grupo (para `docs/relatorio.pdf`):**
+  > [PREENCHER PELO GRUPO: Compare as vantagens e limitações das duas abordagens (legibilidade do código manual, facilidade de gerar mensagens de erro sintático contextualizadas no LL(1) vs. maior poder expressivo de gramáticas com recursão à esquerda no LR) e justifique por que o grupo escolheu o descendente recursivo LL(1) para a MiniLang.]
