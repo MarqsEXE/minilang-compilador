@@ -8,8 +8,22 @@ na gramática EBNF da linguagem.
 
 from dataclasses import dataclass, field
 from typing import List, Optional
+from src.ast_nodes import (
+    AssignNode,
+    BinaryOpNode,
+    BlockNode,
+    BoolLiteralNode,
+    Expression,
+    ForNode,
+    IfNode,
+    IntLiteralNode,
+    PrintNode,
+    ProgramNode,
+    Statement,
+    VarNode,
+    WhileNode,
+)
 from src.lexer import Token, TokenType
-
 
 class MiniLangSyntaxError(Exception):
     """Exceção lançada quando a sequência de tokens viola a gramática da MiniLang."""
@@ -80,7 +94,7 @@ class Parser:
     def _match(self, *types: TokenType) -> bool:
         return self._current().type in types
 
-    def _expect(self, expected_type: TokenType, error_message: str) -> ParseNode:
+    def _expect_token(self, expected_type: TokenType, error_message: str) -> Token:
         tok = self._current()
         if tok.type != expected_type:
             found_desc = "fim de arquivo (EOF)" if tok.type == TokenType.EOF else f"'{tok.lexeme}'"
@@ -90,8 +104,12 @@ class Parser:
                 tok.column,
                 tok,
             )
-        consumed = self._advance()
+        return self._advance()
+
+    def _expect(self, expected_type: TokenType, error_message: str) -> ParseNode:
+        consumed = self._expect_token(expected_type, error_message)
         return ParseNode(symbol=consumed.type.name, token=consumed)
+
 
     # ------------------------------------------------------------------
     # Ponto de entrada público
@@ -99,11 +117,17 @@ class Parser:
 
     def parse_cst(self) -> ParseNode:
         """Analisa todo o programa e retorna a raiz da Árvore Sintática Concreta."""
+        self.pos = 0
         return self._parse_programa()
 
     def parse(self) -> ParseNode:
         """Ponto de entrada principal da fase sintática."""
         return self.parse_cst()
+    
+    def parse_ast(self) -> ProgramNode:
+        """Analisa o programa e retorna a raiz da Árvore Sintática Abstrata (AST)."""
+        self.pos = 0
+        return self._ast_programa()
 
     # ------------------------------------------------------------------
     # Produções da Gramática EBNF
@@ -302,3 +326,194 @@ class Parser:
             tok.column,
             tok,
         )
+        
+    # ------------------------------------------------------------------
+    # Construção Direta da Árvore Sintática Abstrata (AST)
+    # ------------------------------------------------------------------
+
+    def _ast_programa(self) -> ProgramNode:
+        first_tok = self._current()
+        statements: List[Statement] = []
+        while not self._match(TokenType.EOF):
+            statements.append(self._ast_comando())
+        self._expect_token(TokenType.EOF, "Esperado fim de arquivo.")
+        return ProgramNode(line=first_tok.line, column=first_tok.column, statements=statements)
+
+    def _ast_comando(self) -> Statement:
+        tok = self._current()
+
+        if tok.type == TokenType.ID:
+            stmt = self._ast_atribuicao()
+            self._expect_token(TokenType.SEMICOLON, "Esperado ';' ao final do comando de atribuição.")
+            return stmt
+
+        if tok.type == TokenType.PRINT:
+            stmt = self._ast_impressao()
+            self._expect_token(TokenType.SEMICOLON, "Esperado ';' ao final do comando 'print'.")
+            return stmt
+
+        if tok.type == TokenType.IF:
+            return self._ast_condicional()
+
+        if tok.type == TokenType.WHILE:
+            return self._ast_laco_while()
+
+        if tok.type == TokenType.FOR:
+            return self._ast_laco_for()
+
+        if tok.type == TokenType.LBRACE:
+            return self._ast_bloco()
+
+        found_desc = "fim de arquivo (EOF)" if tok.type == TokenType.EOF else f"'{tok.lexeme}'"
+        raise MiniLangSyntaxError(
+            f"Início de comando inválido: {found_desc}. Esperado identificador, 'print', 'if', 'while', 'for' ou '{{'.",
+            tok.line,
+            tok.column,
+            tok,
+        )
+
+    def _ast_atribuicao(self) -> AssignNode:
+        id_tok = self._expect_token(TokenType.ID, "Esperado identificador na atribuição.")
+        self._expect_token(TokenType.ASSIGN, "Esperado '=' após o identificador na atribuição.")
+        expr = self._ast_expressao()
+        return AssignNode(line=id_tok.line, column=id_tok.column, name=id_tok.lexeme, value=expr)
+
+    def _ast_impressao(self) -> PrintNode:
+        print_tok = self._expect_token(TokenType.PRINT, "Esperado palavra reservada 'print'.")
+        self._expect_token(TokenType.LPAREN, "Esperado '(' após 'print'.")
+        expr = self._ast_expressao()
+        self._expect_token(TokenType.RPAREN, "Esperado ')' após a expressão de 'print'.")
+        return PrintNode(line=print_tok.line, column=print_tok.column, expression=expr)
+
+    def _ast_condicional(self) -> IfNode:
+        if_tok = self._expect_token(TokenType.IF, "Esperado palavra reservada 'if'.")
+        self._expect_token(TokenType.LPAREN, "Esperado '(' após 'if'.")
+        cond = self._ast_expressao()
+        self._expect_token(TokenType.RPAREN, "Esperado ')' após a condição do 'if'.")
+        then_block = self._ast_bloco()
+
+        else_block: Optional[BlockNode] = None
+        if self._match(TokenType.ELSE):
+            self._expect_token(TokenType.ELSE, "Esperado 'else'.")
+            else_block = self._ast_bloco()
+
+        return IfNode(
+            line=if_tok.line,
+            column=if_tok.column,
+            condition=cond,
+            then_block=then_block,
+            else_block=else_block,
+        )
+
+    def _ast_laco_while(self) -> WhileNode:
+        while_tok = self._expect_token(TokenType.WHILE, "Esperado palavra reservada 'while'.")
+        self._expect_token(TokenType.LPAREN, "Esperado '(' após 'while'.")
+        cond = self._ast_expressao()
+        self._expect_token(TokenType.RPAREN, "Esperado ')' após a condição do 'while'.")
+        body = self._ast_bloco()
+        return WhileNode(line=while_tok.line, column=while_tok.column, condition=cond, body=body)
+
+    def _ast_laco_for(self) -> ForNode:
+        for_tok = self._expect_token(TokenType.FOR, "Esperado palavra reservada 'for'.")
+        self._expect_token(TokenType.LPAREN, "Esperado '(' após 'for'.")
+        init_clause = self._ast_atribuicao()
+        self._expect_token(
+            TokenType.SEMICOLON,
+            "Esperado ';' após a cláusula de inicialização do 'for'.",
+        )
+        cond_clause = self._ast_expressao()
+        self._expect_token(
+            TokenType.SEMICOLON,
+            "Esperado ';' após a condição do 'for' (a cláusula de atualização é obrigatória).",
+        )
+        update_clause = self._ast_atribuicao()
+        self._expect_token(
+            TokenType.RPAREN,
+            "Esperado ')' após a cláusula de atualização do 'for'.",
+        )
+        body = self._ast_bloco()
+        return ForNode(
+            line=for_tok.line,
+            column=for_tok.column,
+            init=init_clause,
+            condition=cond_clause,
+            update=update_clause,
+            body=body,
+        )
+
+    def _ast_bloco(self) -> BlockNode:
+        lbrace_tok = self._expect_token(TokenType.LBRACE, "Esperado '{' para iniciar bloco de comandos.")
+        statements: List[Statement] = []
+        while not self._match(TokenType.RBRACE, TokenType.EOF):
+            statements.append(self._ast_comando())
+        self._expect_token(TokenType.RBRACE, "Esperado '}' para fechar bloco de comandos.")
+        return BlockNode(line=lbrace_tok.line, column=lbrace_tok.column, statements=statements)
+
+    def _ast_expressao(self) -> Expression:
+        return self._ast_expr_igualdade()
+
+    def _ast_expr_igualdade(self) -> Expression:
+        left = self._ast_expr_relacional()
+        while self._match(TokenType.EQ, TokenType.NEQ):
+            op_tok = self._advance()
+            right = self._ast_expr_relacional()
+            left = BinaryOpNode(line=op_tok.line, column=op_tok.column, left=left, operator=op_tok.lexeme, right=right)
+        return left
+
+    def _ast_expr_relacional(self) -> Expression:
+        left = self._ast_expr_aritmetica()
+        if self._match(TokenType.LT, TokenType.GT, TokenType.LE, TokenType.GE):
+            op_tok = self._advance()
+            right = self._ast_expr_aritmetica()
+            left = BinaryOpNode(line=op_tok.line, column=op_tok.column, left=left, operator=op_tok.lexeme, right=right)
+        return left
+
+    def _ast_expr_aritmetica(self) -> Expression:
+        left = self._ast_termo()
+        while self._match(TokenType.PLUS, TokenType.MINUS):
+            op_tok = self._advance()
+            right = self._ast_termo()
+            left = BinaryOpNode(line=op_tok.line, column=op_tok.column, left=left, operator=op_tok.lexeme, right=right)
+        return left
+
+    def _ast_termo(self) -> Expression:
+        left = self._ast_fator()
+        while self._match(TokenType.STAR, TokenType.SLASH):
+            op_tok = self._advance()
+            right = self._ast_fator()
+            left = BinaryOpNode(line=op_tok.line, column=op_tok.column, left=left, operator=op_tok.lexeme, right=right)
+        return left
+
+    def _ast_fator(self) -> Expression:
+        tok = self._current()
+
+        if tok.type == TokenType.INT_LITERAL:
+            self._advance()
+            return IntLiteralNode(line=tok.line, column=tok.column, value=int(tok.lexeme))
+
+        if tok.type == TokenType.TRUE:
+            self._advance()
+            return BoolLiteralNode(line=tok.line, column=tok.column, value=True)
+
+        if tok.type == TokenType.FALSE:
+            self._advance()
+            return BoolLiteralNode(line=tok.line, column=tok.column, value=False)
+
+        if tok.type == TokenType.ID:
+            self._advance()
+            return VarNode(line=tok.line, column=tok.column, name=tok.lexeme)
+
+        if tok.type == TokenType.LPAREN:
+            self._expect_token(TokenType.LPAREN, "Esperado '('.")
+            expr = self._ast_expressao()
+            self._expect_token(TokenType.RPAREN, "Esperado ')' para fechar expressão entre parênteses.")
+            return expr
+
+        found_desc = "fim de arquivo (EOF)" if tok.type == TokenType.EOF else f"'{tok.lexeme}'"
+        raise MiniLangSyntaxError(
+            f"Expressão inválida: esperado número inteiro, booleano, identificador ou '(', encontrado {found_desc}.",
+            tok.line,
+            tok.column,
+            tok,
+        )
+

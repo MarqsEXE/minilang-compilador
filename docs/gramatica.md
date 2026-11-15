@@ -424,3 +424,47 @@ laco_for
 - **Conceito:** Enquanto o parser descendente recursivo (_top-down_ LL(1)) parte do símbolo inicial `programa` tentando derivar a entrada usando a pilha de chamadas da linguagem hospedeira, um parser ascendente LR (_bottom-up_ _shift-reduce_, como SLR/LALR) empilha tokens (_shift_) e os reduz (_reduce_) ao lado esquerdo das produções usando autômatos de itens LR e tabelas `ACTION`/`GOTO`.
 - **Redação do Grupo (para `docs/relatorio.pdf`):**
   > [PREENCHER PELO GRUPO: Compare as vantagens e limitações das duas abordagens (legibilidade do código manual, facilidade de gerar mensagens de erro sintático contextualizadas no LL(1) vs. maior poder expressivo de gramáticas com recursão à esquerda no LR) e justifique por que o grupo escolheu o descendente recursivo LL(1) para a MiniLang.]
+
+---
+
+## 8. Árvore Sintática Abstrata (AST)
+
+### 8.1. Especificação dos Nós (`src/ast_nodes.py`)
+
+| Classe AST | Superclasse | Campos Principais | Papel Semântico |
+| :--- | :--- | :--- | :--- |
+| `ProgramNode` | `ASTNode` | `statements: List[Statement]` | Raiz do programa; lista ordenada de comandos. |
+| `AssignNode` | `Statement` | `name: str`, `value: Expression` | Atualiza/cria entrada na tabela de símbolos. |
+| `PrintNode` | `Statement` | `expression: Expression` | Avalia expressão e emite valor na saída. |
+| `BlockNode` | `Statement` | `statements: List[Statement]` | Sequência de comandos internos a `{ ... }`. |
+| `IfNode` | `Statement` | `condition`, `then_block`, `else_block` | Desvio condicional com ramo `else` opcional. |
+| `WhileNode` | `Statement` | `condition: Expression`, `body: BlockNode` | Repetição controlada por expressão booleana. |
+| `ForNode` | `Statement` | `init`, `condition`, `update`, `body` | Laço contado com 3 cláusulas obrigatórias. |
+| `BinaryOpNode` | `Expression` | `left`, `operator: str`, `right` | Operação binária aritmética, relacional ou igualdade. |
+| `IntLiteralNode` | `Expression` | `value: int` | Valor inteiro constante já convertido para `int`. |
+| `BoolLiteralNode` | `Expression` | `value: bool` | Valor booleano constante (`True` ou `False`). |
+| `VarNode` | `Expression` | `name: str` | Leitura do valor associado ao identificador. |
+
+---
+
+### 8.2. Diagrama da AST de um Programa Completo com Laço
+
+Considere o programa MiniLang:
+```minilang
+soma = 0;
+for (i = 0; i < 3; i = i + 1) {
+    soma = soma + i;
+}
+print(soma);
+
+### 8.3. Justificativa Formal: Preservação Semântica ($\text{CST} \to \text{AST}$) *(Construção do Grupo)*
+
+**Conceito:** A Árvore Sintática Concreta (CST) registra o processo de derivação gramatical completo (como uma palavra foi reconhecida), enquanto a Árvore Sintática Abstrata (AST) representa apenas a estrutura hierárquica necessária para interpretar o significado do programa.
+
+#### Redação do Grupo *(base para `docs/relatorio.pdf`)*:
+
+> **[PREENCHER PELO GRUPO:** Explique com suas palavras:
+> 
+> * Quais elementos presentes na CST são eliminados na AST (`;`, `(`, `)`, `{`, `}`, palavras-chave redundantes como `for`/`while`, e nós intermediários como `termo`, `fator`, `expr_aritmetica`).
+> * Por que remover os parênteses `(` e `)` na AST de `(1 + 2) * 3` não perde informação de precedência (como a própria estrutura pai-filho dos `BinaryOpNode` preserva a ordem de avaliação).
+> * Como os campos explícitos de `WhileNode` (`condition`, `body`) e `ForNode` (`init`, `condition`, `update`, `body`) preservam integralmente a semântica de execução dos laços da MiniLang.**]**
