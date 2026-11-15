@@ -34,6 +34,14 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a correspondência direta 1-para-1 entre as produções da EBNF e os métodos `_parse_*`, bem como a separação explícita de `parse_cst()` para preservar a Árvore Sintática Concreta antes da abstração para AST na Fase 4. As justificativas da Seção 7.3 e a comparação entre LL(1) e LR/Shift-Reduce foram redigidas pelo trio[cite: 1, 4].
 - **Erros da IA encontrados e corrigidos pelo grupo:** Na suíte de testes sintáticos (`tests/invalidos/test_parser_invalido.py`), a IA fixou o número de linha literal (`assert exc_info.value.line == 5`) ao validar `exemplos/programa_invalido.ml`, causando falha de asserção (`assert 6 == 5`) devido ao cabeçalho de comentários do arquivo. O grupo corrigiu o teste para localizar dinamicamente a linha da instrução `for` no arquivo de exemplo e validar tanto o rastreamento de linha quanto a mensagem diagnóstica.
 
+### Fase 4 — Árvore Sintática Abstrata / AST (15/11/2026)
+- **O que foi pedido à IA:** Definição formal das classes de nós da AST (`WhileNode`, `ForNode` com três cláusulas, etc.), extensão do parser para gerar a AST diretamente, diagrama de programa com laço, roteiro para justificativa de preservação semântica (CST vs. AST) e testes unitários.
+- **O que a IA gerou:** Módulo `src/ast_nodes.py` com 11 classes `dataclass` e método `pretty_print()`, método `parse_ast()` em `src/parser.py`, diagrama na Seção 8 de `docs/gramatica.md` e 6 novos testes em `tests/validos/test_ast.py`.
+- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a construção direta da AST no parser (`_ast_*`) em paralelo a `parse_cst()`, evitando duplicação de código e mantendo compatibilidade com os testes de CST da Fase 3. Confirmamos que cada nó da AST armazena `line` e `column` para suportar mensagens de erro semântico na Fase 5. A justificativa da Seção 8.3 foi redigida pelo trio[cite: 1, 5].
+- **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro encontrado; validamos com `pytest` a igualdade estrutural das ASTs de `1 + 2 * 3`, `(1 + 2) * 3` e `ForNode`.
+
+- **Fase 4 (Árvore Sintática Abstrata):** apoio na modelagem das classes de nós em `src/ast_nodes.py`, implementação de `parse_ast()` em `src/parser.py` e criação dos testes da AST; justificativa formal de preservação semântica redigida pelo grupo[cite: 5, 7].
+
 ---
 
 ### Template para as Próximas Fases
