@@ -106,7 +106,7 @@ class Parser:
             )
         return self._advance()
 
-   def _expect(self, expected_type: TokenType, error_message: str) -> ParseNode:
+    def _expect(self, expected_type: TokenType, error_message: str) -> ParseNode:
         consumed = self._expect_token(expected_type, error_message)
         return ParseNode(symbol=consumed.type.name, token=consumed)
 
@@ -117,7 +117,7 @@ class Parser:
 
     def parse_cst(self) -> ParseNode:
         """Analisa todo o programa e retorna a raiz da Árvore Sintática Concreta."""
-       self.pos = 0
+        self.pos = 0
         return self._parse_programa()
 
     def parse(self) -> ParseNode:
