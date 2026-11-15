@@ -468,3 +468,54 @@ print(soma);
 > * Quais elementos presentes na CST são eliminados na AST (`;`, `(`, `)`, `{`, `}`, palavras-chave redundantes como `for`/`while`, e nós intermediários como `termo`, `fator`, `expr_aritmetica`).
 > * Por que remover os parênteses `(` e `)` na AST de `(1 + 2) * 3` não perde informação de precedência (como a própria estrutura pai-filho dos `BinaryOpNode` preserva a ordem de avaliação).
 > * Como os campos explícitos de `WhileNode` (`condition`, `body`) e `ForNode` (`init`, `condition`, `update`, `body`) preservam integralmente a semântica de execução dos laços da MiniLang.**]**
+
+
+---
+
+## 9. Tabela de Símbolos e Semântica Operacional
+
+### 9.1. Estrutura e Operações da Tabela de Símbolos (`SymbolTable`)
+
+A tabela de símbolos é implementada pela classe `SymbolTable` em `src/interpreter.py`, utilizando uma tabela de dispersão (`dict[str, SymbolEntry]`) para o escopo global único da MiniLang:
+
+| Componente / Operação | Assinatura / Estrutura | Complexidade | Descrição |
+| :--- | :--- | :---: | :--- |
+| **Entrada (`SymbolEntry`)** | `(name, var_type, value, defined_line)` | — | Armazena o identificador, tipo inferido (`"int"` ou `"bool"`), valor corrente e linha de definição. |
+| **Inserção (`insert`)** | `insert(name, value, line) -> SymbolEntry` | $O(1)$ médio | Infere o tipo do valor (`int` ou `bool`) e cria ou sobrescreve o registro da variável na tabela. |
+| **Busca (`lookup`)** | `lookup(name, line, column) -> SymbolEntry` | $O(1)$ médio | Recupera a entrada associada a `name`; dispara `SemanticError` se a variável não existir. |
+| **Existência (`exists`)** | `exists(name) -> bool` | $O(1)$ médio | Verifica se o identificador já foi registrado no ambiente atual. |
+
+---
+
+### 9.2. Semântica Operacional dos Comandos
+
+Seja $\sigma$ o estado corrente da Tabela de Símbolos (`SymbolTable`) e $\langle e, \sigma \rangle \Downarrow v$ a relação de avaliação de uma expressão $e$ para um valor $v \in \mathbb{Z} \cup \{\text{true}, \text{false}\}$[cite: 2, 5]:
+
+1. **Atribuição (`AssignNode(x, e)`):**
+   Avalia primeiro a expressão $e$ no estado $\sigma$ ($\langle e, \sigma \rangle \Downarrow v$) e atualiza o estado para $\sigma' = \sigma[x \mapsto (v, \text{tipo}(v))]$. Se $e$ referenciar $x$ antes de $x$ existir (ex.: `x = x + 1;`), a avaliação falha com `SemanticError`.
+2. **Impressão (`PrintNode(e)`):**
+   Avalia $\langle e, \sigma \rangle \Downarrow v$ e registra a representação textual de $v$ no fluxo de saída sem alterar $\sigma$.
+3. **Bloco (`BlockNode([c_1, ..., c_k])`):**
+   Executa sequencialmente $c_1, c_2, \dots, c_k$, propagando o estado atualizado $\sigma_0 \to \sigma_1 \to \dots \to \sigma_k$ no mesmo escopo global[cite: 3].
+4. **Condicional (`IfNode(cond, B_then, B_else)`):**
+   Avalia $\langle \text{cond}, \sigma \rangle \Downarrow v$. Exige $\text{tipo}(v) = \text{bool}$ (caso contrário, lança `SemanticError`). Se $v = \text{true}$, executa $B_{\text{then}}$; se $v = \text{false}$ e $B_{\text{else}}$ existir, executa $B_{\text{else}}$.
+5. **Laço `while` (`WhileNode(cond, B)`):**
+   - Passo 1: Avalia $\langle \text{cond}, \sigma \rangle \Downarrow v$ e verifica $\text{tipo}(v) = \text{bool}$.
+   - Passo 2: Se $v = \text{false}$, encerra o laço mantendo $\sigma$.
+   - Passo 3: Se $v = \text{true}$ (e o contador de iterações não excedeu `max_iterations`), executa o bloco $B$ produzindo $\sigma'$ e retorna ao Passo 1 com o novo estado $\sigma'$.
+6. **Laço `for` (`ForNode(init, cond, update, B)`):**
+   - Passo 1 (**Inicialização**): Executa `init` ($\sigma \to \sigma_1$).
+   - Passo 2 (**Teste de Condição**): Avalia $\langle \text{cond}, \sigma_1 \rangle \Downarrow v$ e verifica $\text{tipo}(v) = \text{bool}$. Se $v = \text{false}$, encerra o laço.
+   - Passo 3 (**Corpo**): Executa o bloco $B$ ($\sigma_1 \to \sigma_2$).
+   - Passo 4 (**Atualização e Repetição**): Executa `update` ($\sigma_2 \to \sigma_3$) e retorna ao Passo 2 com o estado $\sigma_3$.
+
+---
+
+### 9.3. Justificativas Formais: Tabela de Símbolos e Correção Semântica (Construção do Grupo)
+
+* **Conceito:** A tabela de símbolos é a estrutura de dados central que conecta a declaração/atribuição de identificadores aos seus usos posteriores. Como a MiniLang não possui funções recursivas nem sombreamento de escopo local (*shadowing*), uma única tabela global indexada pelo nome do identificador é suficiente para validar todas as restrições semânticas[cite: 3, 5].
+* **Redação do Grupo (base para `docs/relatorio.pdf`):**
+  > [PREENCHER PELO GRUPO: Explique com suas palavras:
+  > 1. Por que uma única `SymbolTable` global (sem pilha de escopos) é suficiente para todos os requisitos da MiniLang, e como o método `insert` lida com atualizações de variáveis dentro de laços `while` e `for`[cite: 3, 5].
+  > 2. Por que o interpretador precisa testar `isinstance(value, bool)` antes de `type(value) is int` em Python ao validar tipos de expressões.
+  > 3. Como a ordem de execução do `for` (1. `init` $\to$ 2. `condition` $\to$ 3. `body` $\to$ 4. `update`) garante que, se `condition` for falsa logo na entrada, nem `body` nem `update` sejam executados, e por que `for (i = 0; limite < 10; i = i + 1)` ou `for (i = i + 1; i < 10; i = i + 1)` são rejeitados antes da primeira iteração.]
