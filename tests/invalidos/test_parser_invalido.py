@@ -59,7 +59,7 @@ def test_comparacao_encadeada_nao_associativa() -> None:
         _parse_source("ok = 1 < 2 < 3;")
 
 
-def test_programa_invalido_exemplo_rejeitado() -> None:
+def test_programa_invalido_exemplo_rejeitado() -> None: # retornou erro no test: adicionar alteração
     codigo = Path("exemplos/programa_invalido.ml").read_text(encoding="utf-8")
     linha_esperada = next(
         idx
