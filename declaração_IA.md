@@ -15,6 +15,8 @@ Em conformidade com a **Portaria CNPq nº 2.664/2026** e com as normas da discip
 
   - **Fase 5 (Análise Semântica e Interpretador):** apoio na implementação de `SymbolTable` e `Interpreter` em `src/interpreter.py`, bem como nos casos de teste semânticos; justificativas da tabela de símbolos e semântica operacional redigidas pelo grupo.
 
+  - **Fase 6 (Catálogo de Erros e Diagnóstico):** apoio na organização das tabelas de erros (léxicos, sintáticos e semânticos) e na documentação dos cabeçalhos de testes inválidos; justificativa da estratégia de diagnóstico redigida pelo grupo.
+
 - _(Atualizar progressivamente ao final de cada fase: Análise Léxica, Análise Sintática, AST, Interpretador, Catálogo de Erros, Testes e Revisão do Relatório)._
 
 - **Finalidade específica de uso em cada etapa:**

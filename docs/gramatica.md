@@ -519,3 +519,61 @@ Seja $\sigma$ o estado corrente da Tabela de Símbolos (`SymbolTable`) e $\langl
   > 1. Por que uma única `SymbolTable` global (sem pilha de escopos) é suficiente para todos os requisitos da MiniLang, e como o método `insert` lida com atualizações de variáveis dentro de laços `while` e `for`[cite: 3, 5].
   > 2. Por que o interpretador precisa testar `isinstance(value, bool)` antes de `type(value) is int` em Python ao validar tipos de expressões.
   > 3. Como a ordem de execução do `for` (1. `init` $\to$ 2. `condition` $\to$ 3. `body` $\to$ 4. `update`) garante que, se `condition` for falsa logo na entrada, nem `body` nem `update` sejam executados, e por que `for (i = 0; limite < 10; i = i + 1)` ou `for (i = i + 1; i < 10; i = i + 1)` são rejeitados antes da primeira iteração.]
+
+  ---
+
+## 10. Catálogo de Erros e Estratégia de Diagnóstico
+
+### 10.1. Erros Léxicos (`LexicalError` — `src/lexer.py`)
+
+Ocorrem quando a entrada contém caracteres fora do alfabeto $\Sigma$ ou cadeias que não correspondem a nenhuma Expressão Regular dos tokens válidos:
+
+| ID | Mensagem Emitida | Causa Formal | Exemplo de Entrada |
+| :---: | :--- | :--- | :--- |
+| **L1** | `Erro Léxico [linha 2, coluna 5]: Caractere inválido '@' fora do alfabeto da linguagem.` | No estado inicial `q0`, o símbolo `@` não possui transição definida na função $\delta(q_0, c)$. | `x = 10;`<br>`taxa@ = 20;` |
+| **L2** | `Erro Léxico [linha 1, coluna 1]: Identificador ou literal numérico mal formado '1x'.` | No estado `q2` (leitura de `INT_LITERAL`), o AFD encontrou uma letra sem delimitador, violando `[0-9]+` e `[a-zA-Z_][a-zA-Z0-9_]*`[cite: 4]. | `1x = 10;` |
+| **L3** | `Erro Léxico [linha 2, coluna 1]: Comentário de bloco '/* ... */' não fechado antes do fim do arquivo.` | O AFD atingiu `EOF` permanecendo nos estados `q9` ou `q10` sem ler a sequência de fechamento `*/`[cite: 4]. | `x = 1;`<br>`/* sem fim` |
+| **L4** | `Erro Léxico [linha 1, coluna 5]: Operador '!' isolado não é suportado; esperado '!='.` | No estado intermediário `q7` (após ler `!`), o próximo caractere não foi `=`, único sufixo válido[cite: 2, 4]. | `if (!x) { print(1); }` |
+
+---
+
+### 10.2. Erros Sintáticos (`MiniLangSyntaxError` — `src/parser.py`)
+
+Ocorrem quando os tokens são validados pelo lexer, mas a sequência viola alguma regra de produção da gramática EBNF[cite: 4, 6]:
+
+| ID | Mensagem Emitida | Causa Formal | Exemplo de Entrada |
+| :---: | :--- | :--- | :--- |
+| **S1** | `Erro Sintático [linha 1, coluna 10]: Expressão inválida: esperado número inteiro, booleano, identificador ou '(', encontrado ';'.` | Em `_parse_fator()`, após consumir `+`, o lookahead encontra `;`, que não pertence ao conjunto `FIRST(fator)`[cite: 2, 4]. | `x = (1 + ;` |
+| **S2 (Laço)** | `Erro Sintático [linha 1, coluna 19]: Esperado ';' após a condição do 'for' (a cláusula de atualização é obrigatória). Encontrado: ')'.` | Viola a produção `laco_for = "for" "(" atribuicao ";" expressao ";" atribuicao ")" bloco`, omitindo a 3ª cláusula obrigatória. | `for (i = 0; i < 10) {`<br>`    print(i);`<br>`}` |
+| **S3** | `Erro Sintático [linha 2, coluna 1]: Esperado ';' ao final do comando de atribuição. Encontrado: 'y'.` | Viola a produção `comando = atribuicao ";"` pela ausência do delimitador `;` antes do comando seguinte. | `x = 10`<br>`y = 20;` |
+| **S4** | `Erro Sintático [linha 1, coluna 12]: Esperado '{' para iniciar bloco de comandos. Encontrado: 'print'.` | Viola a produção `condicional = "if" "(" expressao ")" bloco [ "else" bloco ]`, que exige `{ ... }` no corpo do `if`. | `if (x > 0) print(x);` |
+
+---
+
+### 10.3. Erros Semânticos (`SemanticError` — `src/interpreter.py`)
+
+Ocorrem em programas sintaticamente válidos que violam restrições sensíveis ao contexto (escopo/definição, sistema de tipos ou domínio aritmético)[cite: 5, 6]:
+
+| ID | Mensagem Emitida | Causa Formal | Exemplo de Entrada |
+| :---: | :--- | :--- | :--- |
+| **M1** | `Erro Semântico [linha 2, coluna 9]: Variável 'z' não definida antes do uso.` | A operação `SymbolTable.lookup('z')` falha porque o identificador não foi inserido previamente na tabela de símbolos. | `x = 10;`<br>`y = x + z;` |
+| **M2** | `Erro Semântico [linha 3, coluna 7]: Divisão por zero.` | Na avaliação de `BinaryOpNode('/')`, o operando direito avalia para `0`, fora do domínio da divisão inteira[cite: 2, 5]. | `a = 10;`<br>`b = 5 - 5;`<br>`c = a / b;` |
+| **M3** | `Erro Semântico [linha 2, coluna 8]: Operador aritmético '+' exige operandos inteiros (int), mas recebeu 'int' e 'bool'.` | Viola a regra de tipagem estrita da operação `+ : int x int -> int`[cite: 2, 5]. | `flag = true;`<br>`x = 10 + flag;` |
+| **M4 (Laço)** | `Erro Semântico [linha 2, coluna 8]: Condição do laço 'while' deve ser booleana (bool), mas recebeu 'int'.` | Viola a restrição semântica de `while (cond)`, que exige expressão de guarda do tipo `bool`[cite: 3, 5, 6]. | `contador = 3;`<br>`while (contador) {`<br>`    contador = contador - 1;`<br>`}` |
+| **M5 (Laço)** | `Erro Semântico [linha 1, coluna 17]: Variável 'limite' não definida antes do uso.` | Na avaliação da 2ª cláusula do `for`, `SymbolTable.lookup('limite')` não encontra a variável de controle/limite[cite: 5, 6]. | `for (i = 0; i < limite; i = i + 1) {`<br>`    print(i);`<br>`}` |
+
+---
+
+### 10.4. Demonstração por Execução via CLI
+
+Todos os erros acima são verificados automaticamente pela suíte `pytest tests/invalidos/ -v` e podem ser reproduzidos diretamente na linha de comando:
+
+```bash
+# Demonstração via arquivo de exemplo inválido (Erro Sintático S2 em laço for):
+python3 -m src.interpreter exemplos/programa_invalido.ml
+
+# Demonstração rápida de Erro Léxico (L1):
+python3 -c "from src.interpreter import run_source; run_source('taxa@ = 10;')"
+
+# Demonstração rápida de Erro Semântico em Laço (M4):
+python3 -c "from src.interpreter import run_source; run_source('x = 1; while (x) { x = 0; }')"

@@ -46,6 +46,12 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a distinção explícita entre `bool` e `int` (`isinstance(val, bool)` antes de `type(val) is int`) para evitar que booleanos em Python sejam tratados como inteiros `0`/`1` em somas ou comparações. Aceita também a ordem exata do `for` (`init` $\to$ `condition` $\to$ `body` $\to$ `update`) e o limite de iterações para proteção contra laços infinitos. A justificativa da Seção 9.3 foi redigida pelo.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro lógico encontrado; validamos a execução ponta a ponta do arquivo `exemplos/programa_valido.ml` via terminal e via `pytest`.
 
+### Fase 6 — Catálogo de Erros e Estratégia de Diagnóstico (15/11/2026)
+- **O que foi pedido à IA:** Estruturação do catálogo de erros (léxicos, sintáticos e semânticos, com pelo menos 3 casos por categoria, incluindo erros em laços), documentação dos resultados esperados no topo dos arquivos de teste em `tests/invalidos/` e roteiro guiado para a justificativa da estratégia de diagnóstico/recuperação.
+- **O que a IA gerou:** Seção 10 em `docs/gramatica.md` com 13 erros catalogados (mensagem, causa formal e exemplo), comandos CLI de demonstração e cabeçalhos documentados nos 3 arquivos de testes inválidos.
+- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a padronização das mensagens com fase e coordenadas (`[linha X, coluna Y]`) e a documentação explícita no topo de `test_lexer_invalido.py`, `test_parser_invalido.py` e `test_interpreter_invalido.py`. A justificativa comparando a estratégia *Fail-Fast* com o *Modo Pânico* na Seção 10.5 foi redigida pelo trio.
+- **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro técnico; conferimos manualmente que todas as mensagens listadas nas tabelas da Seção 10 correspondem exatamente às strings emitidas por `src/lexer.py`, `src/parser.py` e `src/interpreter.py`.
+
 ---
 
 ### Template para as Próximas Fases
