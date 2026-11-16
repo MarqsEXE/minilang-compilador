@@ -1,6 +1,28 @@
 """
-Testes unitários para erros sintáticos da MiniLang.
-Resultado esperado: todos os casos devem lançar MiniLangSyntaxError com linha e coluna exatas.
+Categoria: Erros Sintáticos (tests/invalidos/test_parser_invalido.py)
+
+Resultados esperados documentados (todos devem lançar MiniLangSyntaxError):
+1. test_expressao_incompleta_parenteses:
+   - Entrada: "x = (1 + ;"
+   - Resultado esperado: MiniLangSyntaxError [linha 1, coluna 10] -> Expressão inválida ao encontrar ';'.
+2. test_laco_for_sem_clausula_de_atualizacao (Erro sintático em laço):
+   - Entrada: "for (i = 0; i < 10) { print(i); }"
+   - Resultado esperado: MiniLangSyntaxError [linha 1, coluna 19] -> Esperado ';' após a condição do 'for' (cláusula de atualização obrigatória).
+3. test_laco_for_com_clausula_vazia (Erro sintático em laço):
+   - Entrada: "for (; i < 10; i = i + 1) { print(i); }"
+   - Resultado esperado: MiniLangSyntaxError [linha 1, coluna 6] -> Esperado identificador na atribuição de inicialização.
+4. test_falta_ponto_e_virgula_apos_atribuicao:
+   - Entrada: "x = 10\\ny = 20;"
+   - Resultado esperado: MiniLangSyntaxError [linha 2, coluna 1] -> Esperado ';' ao final do comando de atribuição.
+5. test_if_sem_chaves_de_bloco:
+   - Entrada: "if (x > 0) print(x);"
+   - Resultado esperado: MiniLangSyntaxError [linha 1, coluna 12] -> Esperado '{' para iniciar bloco de comandos.
+6. test_comparacao_encadeada_nao_associativa:
+   - Entrada: "ok = 1 < 2 < 3;"
+   - Resultado esperado: MiniLangSyntaxError [linha 1, coluna 12] -> Esperado ';' após a primeira comparação relacional.
+7. test_programa_invalido_exemplo_rejeitado:
+   - Entrada: arquivo exemplos/programa_invalido.ml
+   - Resultado esperado: MiniLangSyntaxError na linha do 'for' mal formado.
 """
 
 from pathlib import Path
