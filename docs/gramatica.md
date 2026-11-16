@@ -577,3 +577,17 @@ python3 -c "from src.interpreter import run_source; run_source('taxa@ = 10;')"
 
 # Demonstração rápida de Erro Semântico em Laço (M4):
 python3 -c "from src.interpreter import run_source; run_source('x = 1; while (x) { x = 0; }')"
+
+### 10.5. Justificativa da Estratégia de Recuperação/Diagnóstico de Erros (Construção do Grupo)
+
+**Conceito:** Existem duas abordagens principais para tratamento de erros em compiladores educacionais:
+
+* **Parada no Primeiro Erro (*Fail-Fast* com Diagnóstico Contextualizado):** interrompe a compilação imediatamente na primeira falha detectada, informando a fase (Léxico, Sintático ou Semântico), a posição exata (linha, coluna) e o contraste entre o que era esperado e o que foi encontrado.
+* **Recuperação em Modo Pânico (*Panic-Mode Recovery*):** descarta tokens até encontrar um símbolo de sincronização (como `;` ou `}`) para tentar continuar a análise sintática e reportar múltiplos erros de uma só vez.
+
+#### Redação do Grupo (base para `docs/relatorio.pdf`):
+
+> **[PREENCHER PELO GRUPO:** Explique com suas palavras por que o grupo escolheu a estratégia *Fail-Fast* com exceções tipadas por fase e coordenadas exatas (`linha:coluna`) em vez do Modo Pânico. Considere:
+> 1. Como o Modo Pânico pode gerar "erros fantasma" em cascata que confundem alunos iniciantes na plataforma educacional;
+> 2. Por que a separação em três exceções distintas (`LexicalError`, `MiniLangSyntaxError`, `SemanticError`) facilita o diagnóstico didático;
+> 3. Como as mensagens contextualizadas de `_expect_token()` apontam exatamente o construto faltante, como a cláusula obrigatória do `for`.**]**
