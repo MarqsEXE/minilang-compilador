@@ -29,6 +29,8 @@ source venv/bin/activate  # No Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+---
+
 ### 2. Como Rodar os Testes e Resultado Esperado
 
 No diretório `minilang-compilador/`, execute:
@@ -38,4 +40,14 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 pytest
+```
+
+---
+
+### 3. Como Rodar Toda a Suíte de Testes e Resultado Esperado
+
+No diretório raiz `minilang-compilador-/`, execute:
+
+```bash
+pytest -v
 ```
