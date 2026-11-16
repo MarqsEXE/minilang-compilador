@@ -17,6 +17,8 @@ Em conformidade com a **Portaria CNPq nº 2.664/2026** e com as normas da discip
 
   - **Fase 6 (Catálogo de Erros e Diagnóstico):** apoio na organização das tabelas de erros (léxicos, sintáticos e semânticos) e na documentação dos cabeçalhos de testes inválidos; justificativa da estratégia de diagnóstico redigida pelo grupo.
 
+  - **Fase 7 (Testes de Borda e Relatório Final):** apoio na criação dos testes de laços (`test_lacos.py` e `test_laco_infinito.py`) e na estruturação das seções do relatório final; análise crítica, exemplos reais e fundamentação teórica redigidos pelo grupo[cite: 6, 7].
+
 - _(Atualizar progressivamente ao final de cada fase: Análise Léxica, Análise Sintática, AST, Interpretador, Catálogo de Erros, Testes e Revisão do Relatório)._
 
 - **Finalidade específica de uso em cada etapa:**

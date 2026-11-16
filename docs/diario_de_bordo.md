@@ -35,22 +35,32 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 - **Erros da IA encontrados e corrigidos pelo grupo:** Na suíte de testes sintáticos (`tests/invalidos/test_parser_invalido.py`), a IA fixou o número de linha literal (`assert exc_info.value.line == 5`) ao validar `exemplos/programa_invalido.ml`, causando falha de asserção (`assert 6 == 5`) devido ao cabeçalho de comentários do arquivo. O grupo corrigiu o teste para localizar dinamicamente a linha da instrução `for` no arquivo de exemplo e validar tanto o rastreamento de linha quanto a mensagem diagnóstica.
 
 ### Fase 4 — Árvore Sintática Abstrata / AST (15/11/2026)
+
 - **O que foi pedido à IA:** Definição formal das classes de nós da AST (`WhileNode`, `ForNode` com três cláusulas, etc.), extensão do parser para gerar a AST diretamente, diagrama de programa com laço, roteiro para justificativa de preservação semântica (CST vs. AST) e testes unitários.
 - **O que a IA gerou:** Módulo `src/ast_nodes.py` com 11 classes `dataclass` e método `pretty_print()`, método `parse_ast()` em `src/parser.py`, diagrama na Seção 8 de `docs/gramatica.md` e 6 novos testes em `tests/validos/test_ast.py`.
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a construção direta da AST no parser (`_ast_*`) em paralelo a `parse_cst()`, evitando duplicação de código e mantendo compatibilidade com os testes de CST da Fase 3. Confirmamos que cada nó da AST armazena `line` e `column` para suportar mensagens de erro semântico na Fase 5. A justificativa da Seção 8.3 foi redigida pelo trio.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro encontrado; validamos com `pytest` a igualdade estrutural das ASTs de `1 + 2 * 3`, `(1 + 2) * 3` e `ForNode`.
 
 ### Fase 5 — Tabela de Símbolos, Semântica Operacional e Interpretador (15/11/2026)
+
 - **O que foi pedido à IA:** Implementação da tabela de símbolos (`insert`, `lookup`), do interpretador sobre a AST (`src/interpreter.py`), formalização da semântica operacional (especialmente `while` e `for`), verificação estrita de tipos e testes unitários válidos e inválidos.
 - **O que a IA gerou:** Classes `SymbolTable`, `SymbolEntry`, `Interpreter`, `SemanticError`, ponto de entrada CLI (`python3 -m src.interpreter`), documentação da Seção 9 em `docs/gramatica.md` e 17 novos testes unitários[cite: 5].
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a distinção explícita entre `bool` e `int` (`isinstance(val, bool)` antes de `type(val) is int`) para evitar que booleanos em Python sejam tratados como inteiros `0`/`1` em somas ou comparações. Aceita também a ordem exata do `for` (`init` $\to$ `condition` $\to$ `body` $\to$ `update`) e o limite de iterações para proteção contra laços infinitos. A justificativa da Seção 9.3 foi redigida pelo.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro lógico encontrado; validamos a execução ponta a ponta do arquivo `exemplos/programa_valido.ml` via terminal e via `pytest`.
 
 ### Fase 6 — Catálogo de Erros e Estratégia de Diagnóstico (15/11/2026)
+
 - **O que foi pedido à IA:** Estruturação do catálogo de erros (léxicos, sintáticos e semânticos, com pelo menos 3 casos por categoria, incluindo erros em laços), documentação dos resultados esperados no topo dos arquivos de teste em `tests/invalidos/` e roteiro guiado para a justificativa da estratégia de diagnóstico/recuperação.
 - **O que a IA gerou:** Seção 10 em `docs/gramatica.md` com 13 erros catalogados (mensagem, causa formal e exemplo), comandos CLI de demonstração e cabeçalhos documentados nos 3 arquivos de testes inválidos.
-- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a padronização das mensagens com fase e coordenadas (`[linha X, coluna Y]`) e a documentação explícita no topo de `test_lexer_invalido.py`, `test_parser_invalido.py` e `test_interpreter_invalido.py`. A justificativa comparando a estratégia *Fail-Fast* com o *Modo Pânico* na Seção 10.5 foi redigida pelo trio.
+- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a padronização das mensagens com fase e coordenadas (`[linha X, coluna Y]`) e a documentação explícita no topo de `test_lexer_invalido.py`, `test_parser_invalido.py` e `test_interpreter_invalido.py`. A justificativa comparando a estratégia _Fail-Fast_ com o _Modo Pânico_ na Seção 10.5 foi redigida pelo trio.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro técnico; conferimos manualmente que todas as mensagens listadas nas tabelas da Seção 10 correspondem exatamente às strings emitidas por `src/lexer.py`, `src/parser.py` e `src/interpreter.py`.
+
+### Fase 7 — Suíte Completa de Testes de Laços e Relatório Final (15/11/2026)
+
+- **O que foi pedido à IA:** Criação dos testes de casos de borda para `while` e `for` (`0`, `1` e `N` iterações e alteração da variável de controle), testes de laço infinito com limite de iterações e estruturação do esqueleto do relatório final de 2 a 3 páginas.
+- **O que a IA gerou:** Arquivos `tests/validos/test_lacos.py` (9 testes) e `tests/invalidos/test_laco_infinito.py` (4 testes), além do roteiro estruturado do relatório com seções de fundamentação teórica e análise crítica do uso de IA[cite: 6].
+- **O que foi aceito, reescrito ou descartado e por quê:** Aceitos integralmente os 13 novos testes automatizados (totalizando 57 testes aprovados na suíte). O grupo preencheu as análises críticas, a comparação teórica e os exemplos concretos do diário de bordo antes de exportar o documento final para `docs/relatorio.pdf`[cite: 1, 6].
+- **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro técnico nesta fase; validamos que os testes de laço infinito concluem em milissegundos graças ao parâmetro `max_iterations`[cite: 6].
 
 ---
 

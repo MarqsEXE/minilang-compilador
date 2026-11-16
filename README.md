@@ -39,3 +39,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 pytest
 ```
+
+### 3. Como Rodar Toda a Suíte de Testes e Resultado Esperado
+
+No diretório raiz `minilang-compilador-/`, execute:
+
+```bash
+pytest -v
+```
