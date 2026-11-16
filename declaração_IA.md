@@ -13,6 +13,8 @@ Em conformidade com a **Portaria CNPq nº 2.664/2026** e com as normas da discip
 
   - **Fase 4 (Árvore Sintática Abstrata):** apoio na modelagem das classes de nós em `src/ast_nodes.py`, implementação de `parse_ast()` em `src/parser.py` e criação dos testes da AST; justificativa formal de preservação semântica redigida pelo grupo.
 
+  - **Fase 5 (Análise Semântica e Interpretador):** apoio na implementação de `SymbolTable` e `Interpreter` em `src/interpreter.py`, bem como nos casos de teste semânticos; justificativas da tabela de símbolos e semântica operacional redigidas pelo grupo.
+
 - _(Atualizar progressivamente ao final de cada fase: Análise Léxica, Análise Sintática, AST, Interpretador, Catálogo de Erros, Testes e Revisão do Relatório)._
 
 - **Finalidade específica de uso em cada etapa:**

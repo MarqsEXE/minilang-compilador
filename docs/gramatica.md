@@ -513,7 +513,7 @@ Seja $\sigma$ o estado corrente da Tabela de Símbolos (`SymbolTable`) e $\langl
 
 ### 9.3. Justificativas Formais: Tabela de Símbolos e Correção Semântica (Construção do Grupo)
 
-* **Conceito:** A tabela de símbolos é a estrutura de dados central que conecta a declaração/atribuição de identificadores aos seus usos posteriores. Como a MiniLang não possui funções recursivas nem sombreamento de escopo local (*shadowing*), uma única tabela global indexada pelo nome do identificador é suficiente para validar todas as restrições semânticas[cite: 3, 5].
+* **Conceito:** A tabela de símbolos é a estrutura de dados central que conecta a declaração/atribuição de identificadores aos seus usos posteriores. Como a MiniLang não possui funções recursivas nem sombreamento de escopo local (*shadowing*), uma única tabela global indexada pelo nome do identificador é suficiente para validar todas as restrições semânticas.
 * **Redação do Grupo (base para `docs/relatorio.pdf`):**
   > [PREENCHER PELO GRUPO: Explique com suas palavras:
   > 1. Por que uma única `SymbolTable` global (sem pilha de escopos) é suficiente para todos os requisitos da MiniLang, e como o método `insert` lida com atualizações de variáveis dentro de laços `while` e `for`[cite: 3, 5].
