@@ -10,7 +10,7 @@ Projeto final da disciplina **Linguagens Formais e Compiladores** (Cód. 125.31 
 
 ## Ferramenta de IA Generativa Utilizada
 
-- **Ferramenta:** Google Gemini (utilizado como copiloto de desenvolvimento mediante revisão, testes e autoria formal do grupo, conforme registrado em `declaração_IA.md` e `docs/diario_de_bordo.md`).
+- **Ferramenta:** Google Gemini (utilizado como copiloto de desenvolvimento mediante revisão, testes e autoria formal do grupo, conforme registrado em `declaracao_IA.md` e `docs/diario_de_bordo.md`).
 
 ## Estrutura do Repositório
 
@@ -46,8 +46,18 @@ pytest
 
 ### 3. Como Rodar Toda a Suíte de Testes e Resultado Esperado
 
-No diretório raiz `minilang-compilador-/`, execute:
+No diretório raiz do repositório, execute:
 
 ```bash
 pytest -v
 ```
+
+### 4. Executar os programas de exemplo
+
+```bash
+python3 -m src.interpreter exemplos/programa_valido.ml
+python3 -m src.interpreter exemplos/programa_invalido.ml
+```
+
+O primeiro programa deve imprimir `10`, `9`, `8`, `7`, `6`, `5`, `4`, `3`, `2`, `1` e `10`.
+O segundo programa deve terminar com erro sintático indicando que a terceira cláusula do `for` está ausente.

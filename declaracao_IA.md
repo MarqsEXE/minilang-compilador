@@ -2,7 +2,7 @@
 
 Em conformidade com a **Portaria CNPq nº 2.664/2026** e com as normas da disciplina de Linguagens Formais e Compiladores (UNIT), declaramos o uso de ferramenta de Inteligência Artificial generativa como apoio ao desenvolvimento deste projeto:
 
-- **Ferramenta e Versão/Modelo:** Google Gemini (interface web — novembro de 2026).
+- **Ferramenta e Versão/Modelo:** Google Gemini, interface web, utilizada em novembro de 2026. O identificador exato do modelo exibido pela interface não estava disponível nos artefatos fornecidos ao projeto; antes da entrega, o grupo deve confirmar e substituir esta indicação pela versão/modelo exato exibido na conta utilizada.
 - **Etapas em que foi empregada:**
   - **Fase 0 (Setup):** organização da estrutura inicial do repositório e modelos de documentação.
   - **Fase 1 (Definição Formal da Linguagem):** apoio na organização do alfabeto de tokens, rascunho da gramática EBNF e criação dos arquivos de exemplo (`programa_valido.ml` e `programa_invalido.ml`); justificativas formais redigidas pelo grupo.
@@ -18,8 +18,6 @@ Em conformidade com a **Portaria CNPq nº 2.664/2026** e com as normas da discip
   - **Fase 6 (Catálogo de Erros e Diagnóstico):** apoio na organização das tabelas de erros (léxicos, sintáticos e semânticos) e na documentação dos cabeçalhos de testes inválidos; justificativa da estratégia de diagnóstico redigida pelo grupo.
 
   - **Fase 7 (Testes de Borda e Relatório Final):** apoio na criação dos testes de laços (`test_lacos.py` e `test_laco_infinito.py`) e na estruturação das seções do relatório final; análise crítica, exemplos reais e fundamentação teórica redigidos pelo grupo.
-
-- _(Atualizar progressivamente ao final de cada fase: Análise Léxica, Análise Sintática, AST, Interpretador, Catálogo de Erros, Testes e Revisão do Relatório)._
 
 - **Finalidade específica de uso em cada etapa:**
   - Apoio na estruturação de arquivos de configuração e revisão estrutural de código e casos de teste.

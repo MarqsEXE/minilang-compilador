@@ -10,7 +10,7 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 
 - **O que foi pedido à IA:** Criação da estrutura inicial de diretórios e arquivos base e template do diário de bordo conforme a especificação do projeto.
 - **O que a IA gerou:** Árvore de pastas, e textos iniciais de governança.
-- **O que foi aceito, reescrito ou descartado e por quê:** Estrutura de diretórios aceitos integralmente por atenderem exatamente ao layout exigido. `README.md` e `declaração_IA.md` ajustados para incluir os nomes dos três integrantes do grupo e a versão exata da ferramenta utilizada.
+- **O que foi aceito, reescrito ou descartado e por quê:** Estrutura de diretórios aceita integralmente por atender ao layout exigido. `README.md` e `declaracao_IA.md` foram ajustados para incluir os nomes dos três integrantes e a ferramenta utilizada.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro técnico nesta etapa de configuração.
 
 ### Fase 1 — Definição Formal da Linguagem MiniLang (15/11/2026)
@@ -24,7 +24,7 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 
 - **O que foi pedido à IA:** Implementação manual do lexer baseado em AFD em `src/lexer.py` (com linha/coluna e tratamento de `@`, `1x` e comentário não fechado), tabela de tokens, tabela de transições e testes unitários.
 - **O que a IA gerou:** Classe `Lexer` com 11 estados explícitos (`q0` a `q10`), `TokenType`, `LexicalError`, tabela de transições em `docs/gramatica.md` e 9 casos de teste com `pytest`.
-- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a arquitetura de estados explícitos (`q0`..`q10`) pela correspondência direta 1-para-1 com a tabela de transições do relatório. Incluímos suporte a comentários de bloco `/* ... */` (além de `//`) para viabilizar o diagnóstico formal de comentário não fechado no AFD (`q9`/`q10`). A justificativa formal da Seção 6.3 foi redigida pelo trio.
+- **O que foi aceito, reescrito ou descartado e por quê:** A arquitetura de estados explícitos (`q0`..`q10`) foi aceita por corresponder à tabela de transições. O projeto mantém comentários de linha `//` como forma obrigatória e adiciona comentários de bloco `/* ... */` como extensão documentada: um bloco sem fechamento gera `LexicalError`. A justificativa formal da Seção 6.3 foi redigida pelo trio.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro lógico encontrado; validamos manualmente o comportamento de lookahead em `/` seguido de número (`x / 2`) e em `1x` (rejeitado em `q2` antes de avançar para o parser).
 
 ### Fase 3 — Análise Sintática / Parser Descendente Recursivo (15/11/2026)
@@ -44,7 +44,7 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 ### Fase 5 — Tabela de Símbolos, Semântica Operacional e Interpretador (15/11/2026)
 
 - **O que foi pedido à IA:** Implementação da tabela de símbolos (`insert`, `lookup`), do interpretador sobre a AST (`src/interpreter.py`), formalização da semântica operacional (especialmente `while` e `for`), verificação estrita de tipos e testes unitários válidos e inválidos.
-- **O que a IA gerou:** Classes `SymbolTable`, `SymbolEntry`, `Interpreter`, `SemanticError`, ponto de entrada CLI (`python3 -m src.interpreter`), documentação da Seção 9 em `docs/gramatica.md` e 17 novos testes unitários[cite: 5].
+- **O que a IA gerou:** Classes `SymbolTable`, `SymbolEntry`, `Interpreter`, `SemanticError`, ponto de entrada CLI (`python3 -m src.interpreter`), documentação da Seção 9 em `docs/gramatica.md` e 17 novos testes unitários.
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a distinção explícita entre `bool` e `int` (`isinstance(val, bool)` antes de `type(val) is int`) para evitar que booleanos em Python sejam tratados como inteiros `0`/`1` em somas ou comparações. Aceita também a ordem exata do `for` (`init` $\to$ `condition` $\to$ `body` $\to$ `update`) e o limite de iterações para proteção contra laços infinitos. A justificativa da Seção 9.3 foi redigida pelo.
 - **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro lógico encontrado; validamos a execução ponta a ponta do arquivo `exemplos/programa_valido.ml` via terminal e via `pytest`.
 
@@ -64,13 +64,34 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 
 ---
 
-### Template para as Próximas Fases
+---
 
-```markdown
-### Fase X — [Nome da Fase] (DD/MM/2026)
+## Registro semanal
 
-- **O que foi pedido à IA:**
-- **O que a IA gerou:**
-- **O que foi aceito, reescrito ou descartado e por quê:**
-- **Erros da IA encontrados e corrigidos pelo grupo (conceito teórico envolvido):**
-```
+### Semana 1 — 10/11/2026 a 16/11/2026
+
+- **O que foi feito:** organização do repositório, definição da linguagem, gramática EBNF, implementação inicial do lexer e criação dos primeiros testes.
+- **Uso de IA:** Google Gemini foi usado para rascunhos estruturais e testes, que foram revisados pelo trio.
+- **Dificuldades:** alinhar maximal munch, posições de erro e comentários com a especificação formal.
+- **Decisões:** definir exclusivamente `/` como divisão e manter `//` como comentário de linha; os comentários de bloco foram documentados como extensão adicional.
+
+### Semana 2 — 17/11/2026 a 23/11/2026
+
+- **O que foi feito:** consolidação do parser, AST, interpretador, tabela de símbolos, catálogo de erros e testes de laços.
+- **Uso de IA:** auxílio na geração de esqueleto de código e de casos de teste; a equipe corrigiu problemas de linha, prioridade de operadores e divisão inteira.
+- **Dificuldades:** diferenciar CST e AST, testar associatividade à esquerda e proteger laços infinitos.
+- **Decisões:** manter escopo global, exceções tipadas por fase e limite configurável de iterações.
+
+### Semana 3 — 24/11/2026 a 30/11/2026
+
+- **O que será feito:** revisão da documentação, geração do relatório PDF, ensaio do vídeo e verificação final em ambiente limpo.
+- **Uso de IA:** aplicar IA somente como apoio de redação e revisão, com validação humana de toda afirmação técnica.
+- **Dificuldades:** garantir que o relatório permaneça entre duas e três páginas e que os exemplos sejam verificáveis.
+- **Decisões:** não considerar uma afirmação correta até que o código e os testes correspondentes tenham sido executados.
+
+### Semana 4 — 01/12/2026
+
+- **Entrega e apresentação:** publicação da versão final, gravação/apresentação do vídeo e preparação da arguição individual.
+- **Uso de IA:** revisar o histórico e a declaração de IA, mantendo consistência entre README, declaração, diário e relatório.
+- **Dificuldades:** explicar todos os itens individualmente e demonstrar execução ponta a ponta sem consulta durante a arguição.
+- **Decisões:** cada integrante deve conhecer lexer, parser, AST, interpretador, testes e justificativas da IA.
