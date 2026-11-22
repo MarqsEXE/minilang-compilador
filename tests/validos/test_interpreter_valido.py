@@ -38,6 +38,13 @@ def test_aritmetica_precedencia_e_divisao_inteira_truncada() -> None:
     assert run_source(codigo) == ["7", "9", "3", "-3"]
 
 
+def test_divisao_inteira_grande_sem_conversao_para_float() -> None:
+    codigo = "a = " + ("9" * 400) + "; print(a / 2);"
+    saidas = run_source(codigo)
+    assert len(saidas) == 1
+    assert saidas[0].isdigit()
+
+
 def test_operadores_relacionais_e_igualdade() -> None:
     codigo = """
     print(10 > 5);

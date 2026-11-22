@@ -48,6 +48,16 @@ def test_ast_precedencia_1_mais_2_vezes_3() -> None:
     assert assign.value == expected_expr
 
 
+def test_ast_associatividade_esquerda_subtracao() -> None:
+    ast = _build_ast("r = 10 - 3 - 2;")
+    assign = ast.statements[0]
+    assert isinstance(assign, AssignNode)
+    assert isinstance(assign.value, BinaryOpNode)
+    assert assign.value.operator == "-"
+    assert isinstance(assign.value.left, BinaryOpNode)
+    assert assign.value.left.operator == "-"
+
+
 def test_ast_parenteses_elimina_delimitadores_preservando_agrupamento() -> None:
     ast = _build_ast("r = (1 + 2) * 3;")
     assign = ast.statements[0]
