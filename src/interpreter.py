@@ -27,8 +27,8 @@ from src.ast_nodes import (
     VarNode,
     WhileNode,
 )
-from src.lexer import Lexer
-from src.parser import Parser
+from src.lexer import Lexer, LexicalError
+from src.parser import Parser, MiniLangSyntaxError
 
 RuntimeValue = Union[int, bool]
 
@@ -307,7 +307,10 @@ class Interpreter:
                         node.column,
                     )
                 # Divisão inteira truncada em direção a zero
-                return int(left / right)
+                quotient = abs(left) // abs(right)
+                if (left < 0) != (right < 0):
+                    quotient = -quotient
+                return quotient
 
         # Operadores relacionais: exigem (int, int) -> bool
         if op in ("<", ">", "<=", ">="):
@@ -369,7 +372,7 @@ def main() -> None:
     source = file_path.read_text(encoding="utf-8")
     try:
         run_source(source, echo_stdout=True)
-    except Exception as exc:
+    except (LexicalError, MiniLangSyntaxError, SemanticError) as exc:
         print(str(exc), file=sys.stderr)
         sys.exit(1)
 
