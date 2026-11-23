@@ -2,6 +2,10 @@
 
 Projeto final da disciplina **Linguagens Formais e Compiladores** (Cód. 125.31 — Turma GP0029V) do curso de **Ciência da Computação** da **Universidade Tiradentes (UNIT)**, ministrada pela Prof.ª Layse Santos Souza.
 
+<p align="center">
+  <img src="./minilang-robot.gif" alt="Robô do MiniLang" width="400" />
+</p>
+
 ## Integrantes do Trio
 
 1. Lauana de Souza Santos
