@@ -69,12 +69,13 @@ fator           = INT_LITERAL
                 | "false"
                 | ID
                 | "(" expressao ")" ;
-
+````
 ## 3. Tabela de Precedência e Associatividade
 
 A hierarquia de precedência é garantida estruturalmente pela profundidade dos não terminais na gramática (quanto mais próximo de fator, maior a precedência):
 
-| --- | --- | --- | --- | --- |
+| Precedência | Operadores | Categoria | Associatividade | Não terminal |
+| :--- | :--- | :--- | :--- | :--- |
 | **1 (Maior)** | `( ... )`, literais, `ID` | Agrupamento e átomos | — | `fator` |
 | **2** | `*`, `/` | Multiplicativa | Esquerda (`{ ... }`) | `termo` |
 | **3** | `+`, `-` | Aditiva | Esquerda (`{ ... }`) | `expr_aritmetica` |
