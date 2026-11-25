@@ -605,6 +605,7 @@ python3 -c "from src.interpreter import run_source; run_source('taxa@ = 10;')"
 
 # Demonstração rápida de Erro Semântico em Laço (M4):
 python3 -c "from src.interpreter import run_source; run_source('x = 1; while (x) { x = 0; }')"
+```
 
 ### 10.5. Justificativa da Estratégia de Recuperação/Diagnóstico de Erros (Construção do Grupo)
 

@@ -84,7 +84,7 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 
 ### Semana 3 — 24/11/2026 a 30/11/2026
 
-- **O que será feito:** revisão da documentação, geração do relatório PDF, ensaio do vídeo e verificação final em ambiente limpo.
+- **O que foi feito:** revisão da documentação, geração do relatório PDF, ensaio do vídeo e verificação final em ambiente limpo.
 - **Uso de IA:** aplicar IA somente como apoio de redação e revisão, com validação humana de toda afirmação técnica.
 - **Dificuldades:** garantir que o relatório permaneça entre duas e três páginas e que os exemplos sejam verificáveis.
 - **Decisões:** não considerar uma afirmação correta até que o código e os testes correspondentes tenham sido executados.
