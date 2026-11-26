@@ -23,6 +23,8 @@ O alfabeto de símbolos terminais $\Sigma$ da MiniLang é dividido nas seguintes
 8. **Símbolos Ignorados (Trivia Léxica):**
    - Espaços em branco, tabulações e quebras de linha: `[ \t\r\n]+`
    - Comentários de linha única: `//[^\n]*` (iniciam em `//` e seguem até o fim da linha ou `EOF`)
+   - Comentários de bloco: `/\*([^*]|\*+[^*/])*\*/` (extensão adicional, encerrada no primeiro `*/`; não são aninháveis)
+   - Um comentário de bloco sem fechamento antes de `EOF` gera `LexicalError`.
 9. **Fim de Arquivo (`EOF`):**
    Marcador lógico de término da entrada.
 
@@ -244,10 +246,10 @@ for (k = 0; k < limite; k = k + 1) {
 | `EOF`                       | Fim da entrada                                          | `""` (fim de arquivo)            |
 | _(Ignorado)_                | `[ \t\r\n]+` \| `//[^\n]*` \| `/\*([^*]\|\*+[^*/])*\*/` | espaços, `// obs`, `/* bloco */` |
 
-O comentário `//` é a forma exigida pelo escopo obrigatório: ele começa em `//` e termina
-na quebra de linha ou no fim da entrada. O projeto também implementa `/* ... */` como uma
-extensão adicional documentada; um bloco não fechado gera erro léxico, pois não corresponde
-a uma cadeia válida do alfabeto de trivia.
+O comentário `//` é a forma exigida pelo escopo obrigatório: começa em `//` e termina na quebra
+de linha ou em `EOF`. Comentários de bloco `/* ... */` são uma extensão adicional, encerrada no
+primeiro `*/` (não são aninháveis); se não houver fechamento antes de `EOF`, o lexer gera
+`LexicalError`.
 
 ---
 
@@ -274,6 +276,10 @@ Legenda de classes de caracteres:
 | **`q8`**  |      `q8`       |      `q8`       |      `q8`       |      `q8`       |      `q8`       |      `q8`       |      `q8`      |      `q8`       |      `q8`       |      `q8`       |      `q0`       |      `q0`       |      `q8`       | Comentário `//`                  |
 | **`q9`**  |      `q9`       |      `q9`       |      `q9`       |      `q9`       |      `q9`       |      `q10`      |      `q9`      |      `q9`       |      `q9`       |      `q9`       |      `q9`       |    **Erro**     |      `q9`       | Comentário `/*`                  |
 | **`q10`** |      `q9`       |      `q9`       |      `q9`       |      `q9`       |      `q0`       |      `q10`      |      `q9`      |      `q9`       |      `q9`       |      `q9`       |      `q9`       |    **Erro**     |      `q9`       | Fecha `*/` ou volta `q9`         |
+
+Os comentários de bloco `/* ... */` são uma extensão adicional, encerrada no primeiro `*/`
+(não são aninháveis); se não houver fechamento antes de `EOF`, o lexer gera `LexicalError`.
+Assim, `q9` e `q10` não aceitam `EOF`: essa transição produz o erro de comentário não fechado.
 
 ---
 

@@ -2,7 +2,7 @@
 
 Em conformidade com a **Portaria CNPq nº 2.664/2026** e com as normas da disciplina de Linguagens Formais e Compiladores (UNIT), declaramos o uso de ferramenta de Inteligência Artificial generativa como apoio ao desenvolvimento deste projeto:
 
-- **Ferramenta e Versão/Modelo:** Google Gemini, interface web, utilizada em novembro de 2026. O identificador exato do modelo exibido pela interface não estava disponível nos artefatos fornecidos ao projeto; antes da entrega, o grupo deve confirmar e substituir esta indicação pela versão/modelo exato exibido na conta utilizada.
+- **Ferramenta e Versão/Modelo:** Google Gemini, interface web, utilizada em novembro de 2026. 
 - **Etapas em que foi empregada:**
   - **Fase 0 (Setup):** organização da estrutura inicial do repositório e modelos de documentação.
   - **Fase 1 (Definição Formal da Linguagem):** apoio na organização do alfabeto de tokens, rascunho da gramática EBNF e criação dos arquivos de exemplo (`programa_valido.ml` e `programa_invalido.ml`); justificativas formais redigidas pelo grupo.

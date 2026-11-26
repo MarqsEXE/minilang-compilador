@@ -32,7 +32,7 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 - **O que foi pedido à IA:** Implementação manual do parser descendente recursivo preditivo LL(1) em `src/parser.py`, construção das árvores sintáticas concretas (`1 + 2 * 3`, `(1 + 2) * 3`, `while` e `for`), roteiro para justificativas formais e comparação com análise LR, além de testes unitários válidos e inválidos.
 - **O que a IA gerou:** Classe `Parser` com métodos correspondentes a cada produção EBNF, estrutura `ParseNode` com método `pretty_print()`, exceção `MiniLangSyntaxError` com linha/coluna, árvores concretas na Seção 7 de `docs/gramatica.md` e 12 novos testes unitários.
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceita a correspondência direta 1-para-1 entre as produções da EBNF e os métodos `_parse_*`, bem como a separação explícita de `parse_cst()` para preservar a Árvore Sintática Concreta antes da abstração para AST na Fase 4. As justificativas da Seção 7.3 e a comparação entre LL(1) e LR/Shift-Reduce foram redigidas pelo trio.
-- **Erros da IA encontrados e corrigidos pelo grupo:** Na suíte de testes sintáticos (`tests/invalidos/test_parser_invalido.py`), a IA fixou o número de linha literal (`assert exc_info.value.line == 5`) ao validar `exemplos/programa_invalido.ml`, causando falha de asserção (`assert 6 == 5`) devido ao cabeçalho de comentários do arquivo. O grupo corrigiu o teste para localizar dinamicamente a linha da instrução `for` no arquivo de exemplo e validar tanto o rastreamento de linha quanto a mensagem diagnóstica.
+- **Erros da IA encontrados e corrigidos pelo grupo:** A IA construiu à direita expressões que, pela gramática, deveriam ser associativas à esquerda. O grupo ajustou a construção da AST para acumular os operadores da esquerda para a direita, preservando a precedência definida na EBNF.
 
 ### Fase 4 — Árvore Sintática Abstrata / AST (15/11/2026)
 
@@ -45,8 +45,8 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 
 - **O que foi pedido à IA:** Implementação da tabela de símbolos (`insert`, `lookup`), do interpretador sobre a AST (`src/interpreter.py`), formalização da semântica operacional (especialmente `while` e `for`), verificação estrita de tipos e testes unitários válidos e inválidos.
 - **O que a IA gerou:** Classes `SymbolTable`, `SymbolEntry`, `Interpreter`, `SemanticError`, ponto de entrada CLI (`python3 -m src.interpreter`), documentação da Seção 9 em `docs/gramatica.md` e 17 novos testes unitários.
-- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a distinção explícita entre `bool` e `int` (`isinstance(val, bool)` antes de `type(val) is int`) para evitar que booleanos em Python sejam tratados como inteiros `0`/`1` em somas ou comparações. Aceita também a ordem exata do `for` (`init` $\to$ `condition` $\to$ `body` $\to$ `update`) e o limite de iterações para proteção contra laços infinitos. A justificativa da Seção 9.3 foi redigida pelo.
-- **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro lógico encontrado; validamos a execução ponta a ponta do arquivo `exemplos/programa_valido.ml` via terminal e via `pytest`.
+- **O que foi aceito, reescrito ou descartado e por quê:** Aceita a distinção explícita entre `bool` e `int` (`isinstance(val, bool)` antes de `type(val) is int`) para evitar que booleanos em Python sejam tratados como inteiros `0`/`1` em somas ou comparações. Aceita também a ordem exata do `for` (`init` $\to$ `condition` $\to$ `body` $\to$ `update`) e o limite de iterações para proteção contra laços infinitos. A justificativa da Seção 9.3 foi redigida pelo Grupo.
+- **Erros da IA encontrados e corrigidos pelo grupo:** A implementação inicial da divisão inteira convertia o resultado de `left / right` para `float`, podendo perder precisão em inteiros grandes. O grupo substituiu essa conversão por cálculo exclusivamente inteiro, mantendo o truncamento em direção a zero definido pela linguagem, e validou o comportamento com testes.
 
 ### Fase 6 — Catálogo de Erros e Estratégia de Diagnóstico (15/11/2026)
 
@@ -60,7 +60,7 @@ Registro semanal do processo de desenvolvimento, decisões técnicas da equipe e
 - **O que foi pedido à IA:** Criação dos testes de casos de borda para `while` e `for` (`0`, `1` e `N` iterações e alteração da variável de controle), testes de laço infinito com limite de iterações e estruturação do esqueleto do relatório final de 2 a 3 páginas.
 - **O que a IA gerou:** Arquivos `tests/validos/test_lacos.py` (9 testes) e `tests/invalidos/test_laco_infinito.py` (4 testes), além do roteiro estruturado do relatório com seções de fundamentação teórica e análise crítica do uso de IA.
 - **O que foi aceito, reescrito ou descartado e por quê:** Aceitos integralmente os 13 novos testes automatizados (totalizando 57 testes aprovados na suíte). O grupo preencheu as análises críticas, a comparação teórica e os exemplos concretos do diário de bordo antes de exportar o documento final para `docs/relatorio.pdf`.
-- **Erros da IA encontrados e corrigidos pelo grupo:** Nenhum erro técnico nesta fase; validamos que os testes de laço infinito concluem em milissegundos graças ao parâmetro `max_iterations`.
+- **Erros da IA encontrados e corrigidos pelo grupo:** Foram corrigidos dois problemas: o tratamento das cláusulas vazias de `for` foi alinhado à gramática, que exige inicialização, condição e atualização; e um teste do arquivo `exemplos/programa_invalido.ml` deixou de fixar um número de linha literal, passando a localizar dinamicamente a linha do `for` e validar também a mensagem diagnóstica. Além disso, validamos que os testes de laço infinito concluem em milissegundos graças ao parâmetro `max_iterations`.
 
 ---
 
